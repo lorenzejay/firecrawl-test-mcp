@@ -43,8 +43,8 @@ def research(topic: str) -> str:
     result = researcher.kickoff(
         f"Research this topic and report what you find: {topic}\n\n"
         "Use firecrawl_search to find relevant sources, then firecrawl_scrape on the "
-        "two or three most promising URLs. Keep each search to at most 5 results so "
-        "calls stay within the MCP tool timeout.\n\n"
+        "two or three most promising URLs with onlyMainContent set to true. Keep each "
+        "search to at most 5 results so calls stay within the MCP tool timeout.\n\n"
         "Answer with a short briefing: a one-paragraph summary followed by 3-5 key "
         "findings, each ending with the URL it came from."
     )

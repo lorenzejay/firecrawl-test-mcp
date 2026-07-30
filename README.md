@@ -1,56 +1,60 @@
-# {{crew_name}} Crew
+# crewai-firecrawl-mcp-test
 
-Welcome to the {{crew_name}} Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+A single crewAI agent that researches a topic using the [Firecrawl MCP server](https://github.com/firecrawl/firecrawl-mcp-server) over streamable HTTP.
+
+The agent searches the live web with `firecrawl_search`, reads the most promising
+pages with `firecrawl_scrape`, and returns a short sourced briefing.
 
 ## Installation
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
-
-First, if you haven't already, install uv:
+Requires Python >=3.10 <3.14 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-pip install uv
+uv sync
 ```
 
-Next, navigate to your project directory and install the dependencies:
+## Configuration
 
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
+Add these to `.env`:
 
-### Customizing
+| Variable | Purpose |
+|---|---|
+| `OPENAI_API_KEY` | LLM used by the agent |
+| `FIRECRAWL_API_KEY` | Firecrawl key, sent as the `x-firecrawl-api-key` header |
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+`FIRECRAWL_API_KEY` is optional. Without it the agent falls back to the hosted
+keyless tier, which is rate limited but still allows search and scrape. Get a key
+at [firecrawl.dev](https://www.firecrawl.dev/app/api-keys).
 
-- Modify `src/crewai_firecrawl_mcp_test/config/agents.yaml` to define your agents
-- Modify `src/crewai_firecrawl_mcp_test/config/tasks.yaml` to define your tasks
-- Modify `src/crewai_firecrawl_mcp_test/crew.py` to add your own logic, tools and specific args
-- Modify `src/crewai_firecrawl_mcp_test/main.py` to add custom inputs for your agents and tasks
-
-## Running the Project
-
-To kickstart your flow and begin execution, run this from the root folder of your project:
+## Running
 
 ```bash
-crewai run
+# Topic as a command line argument
+uv run kickoff "recent benchmarks comparing AI coding agents"
+
+# Or via the RESEARCH_TOPIC env var, which is what `crewai run` uses
+RESEARCH_TOPIC="state of MCP adoption" crewai run
 ```
 
-This command initializes the crewai-firecrawl-mcp-test Flow as defined in your configuration.
+With no topic given, it researches the default in `DEFAULT_TOPIC`.
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+## How it works
 
-## Understanding Your Crew
+Everything lives in `src/crewai_firecrawl_mcp_test/main.py`:
 
-The crewai-firecrawl-mcp-test Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+- `firecrawl_mcp()` builds an `MCPServerHTTP` config pointed at
+  `https://mcp.firecrawl.dev/v2/mcp` with `streamable=True`. The API key goes in a
+  header rather than the URL path so it stays out of the generated tool names.
+  A static tool filter narrows the server's 26 tools down to
+  `firecrawl_search` and `firecrawl_scrape`.
+- `research()` creates one `Agent` with that MCP server attached via `mcps=[...]`
+  and runs a single `Agent.kickoff()`.
+
+Note: `mcp` is pinned to `<2` because crewAI 1.6.1's HTTP transport imports
+`streamablehttp_client`, which mcp 2.x renamed.
 
 ## Support
 
-For support, questions, or feedback regarding the {{crew_name}} Crew or crewAI.
-
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
-
-Let's create wonders together with the power and simplicity of crewAI.
+- [crewAI documentation](https://docs.crewai.com)
+- [crewAI GitHub](https://github.com/crewAIInc/crewAI)
+- [Firecrawl MCP server](https://github.com/firecrawl/firecrawl-mcp-server)
