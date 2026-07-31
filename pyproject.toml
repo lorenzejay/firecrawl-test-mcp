@@ -14,6 +14,7 @@ dependencies = [
 [project.scripts]
 kickoff = "crewai_firecrawl_mcp_test.main:kickoff"
 run_crew = "crewai_firecrawl_mcp_test.main:kickoff"
+plot = "crewai_firecrawl_mcp_test.main:plot"
 
 [build-system]
 requires = ["hatchling"]

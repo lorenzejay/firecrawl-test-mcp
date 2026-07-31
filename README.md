@@ -1,9 +1,10 @@
 # crewai-firecrawl-mcp-test
 
-A single crewAI agent that researches a topic using the [Firecrawl MCP server](https://github.com/firecrawl/firecrawl-mcp-server) over streamable HTTP.
+A crewAI Flow that researches a topic using the [Firecrawl MCP server](https://github.com/firecrawl/firecrawl-mcp-server) over streamable HTTP.
 
-The agent searches the live web with `firecrawl_search`, reads the most promising
-pages with `firecrawl_scrape`, and returns a short sourced briefing.
+The first step searches the live web with `firecrawl_search` and reads the most
+promising pages with `firecrawl_scrape`; the second turns those notes into a
+short sourced briefing.
 
 ## Installation
 
@@ -47,8 +48,15 @@ Everything lives in `src/crewai_firecrawl_mcp_test/main.py`:
   header rather than the URL path so it stays out of the generated tool names.
   A static tool filter narrows the server's 26 tools down to
   `firecrawl_search` and `firecrawl_scrape`.
-- `research()` creates one `Agent` with that MCP server attached via `mcps=[...]`
-  and runs a single `Agent.kickoff()`.
+- `ResearchFlow` is a `Flow[ResearchState]` with two steps. `gather_sources()` is
+  the `@start()` step: it creates an `Agent` with that MCP server attached via
+  `mcps=[...]` and stores the raw notes in `state.findings`. `write_briefing()`
+  `@listen`s for it and hands those notes to a second, tool-less agent, storing
+  the result in `state.briefing`.
+- Flow inputs populate the state, so `ResearchFlow().kickoff(inputs={"topic": ...})`
+  is what sets `state.topic`.
+
+Run `uv run plot` to render the flow graph as an HTML file.
 
 Note: `mcp` is pinned to `<2` because crewAI 1.6.1's HTTP transport imports
 `streamablehttp_client`, which mcp 2.x renamed.
