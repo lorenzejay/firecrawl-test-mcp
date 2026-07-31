@@ -54,10 +54,13 @@ class ResearchFlow(Flow[ResearchState]):
 
         result = researcher.kickoff(
             f"Research this topic and report what you find: {self.state.topic}\n\n"
-            "Use firecrawl_search to find relevant sources, then firecrawl_scrape on "
-            "the two or three most promising URLs with onlyMainContent set to true. "
-            "Keep each search to at most 5 results so calls stay within the MCP tool "
-            "timeout.\n\n"
+            "Call firecrawl_search with only `query` and `limit` (5 at most, so calls "
+            "stay within the MCP tool timeout). Then call firecrawl_scrape on the two "
+            "or three most promising URLs with only `url` and `formats: [\"markdown\"]` "
+            "and `onlyMainContent: true`.\n\n"
+            "Do not pass any other parameter to either tool. The schemas advertise "
+            "options like zeroDataRetention, enterprise, and queryOptions that this "
+            "Firecrawl plan rejects with a 400.\n\n"
             "Answer with raw notes: what each source said, each note paired with the "
             "URL it came from."
         )

@@ -61,6 +61,15 @@ Run `uv run plot` to render the flow graph as an HTML file.
 Note: `mcp` is pinned to `<2` because crewAI 1.6.1's HTTP transport imports
 `streamablehttp_client`, which mcp 2.x renamed.
 
+## Troubleshooting
+
+**`firecrawl_search execution failed: Request failed with status code 400`** —
+the agent filled in an optional parameter the Firecrawl plan does not allow.
+`scrapeOptions.zeroDataRetention` is the usual one: the tool schema advertises
+it, but the API rejects the whole request when a non-enterprise key sends it.
+The research prompt tells the agent to pass only the minimal parameters, which
+is the only lever here since `MCPServerHTTP` can filter tools but not arguments.
+
 ## Support
 
 - [crewAI documentation](https://docs.crewai.com)
